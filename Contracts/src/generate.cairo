@@ -19,6 +19,10 @@ trait IOwnable<TContractState> {
 
 #[starknet::contract]
 mod Generate {
+    use openzeppelin::upgrades::interface::IUpgradeable;
+    use openzeppelin::upgrades::upgradeable::Upgradeable;
+    use openzeppelin::access::ownable::interface::IOwnable;
+    use openzeppelin::access::ownable::ownable::Ownable;
     use core::traits::Into;
     use starknet::ClassHash;
     use starknet::contract_address_to_felt252;
@@ -31,14 +35,6 @@ mod Generate {
     use option::OptionTrait;
     use serde::Serde;
     use box::BoxTrait;
-
-    // Upgradable
-    use openzeppelin::upgrades::interface::IUpgradeable;
-    use openzeppelin::upgrades::upgradeable::Upgradeable;
-
-    // Ownable
-    use openzeppelin::access::ownable::interface::IOwnable;
-    use openzeppelin::access::ownable::ownable::Ownable;
 
     const DECIMALS: u256 = 1000000000000000000;
 
@@ -62,9 +58,11 @@ mod Generate {
     #[storage]
     struct Storage {
         charater_id: u256,
-        user_to_characters: LegacyMap::<ContractAddress, u256>,
-        character_to_generations: LegacyMap::<u256, ContractAddress>,
+        // This mapping should return character array when given a address
+        // user_to_characters: LegacyMap::<ContractAddress, u256>,
+        // character_to_generations: LegacyMap::<u256, ContractAddress>,
     }
+
     #[event]
     #[derive(Drop, starknet::Event)]
     enum Event {}
@@ -76,6 +74,7 @@ mod Generate {
         Ownable::InternalImpl::initializer(ref unsafe_state, owner);
     }
 
+    // Upgradability
     #[external(v0)]
     impl UpgradeableImpl of IUpgradeable<ContractState> {
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
@@ -85,6 +84,7 @@ mod Generate {
         }
     }
 
+    // Access Control
     #[external(v0)]
     impl OwnableImpl of IOwnable<ContractState> {
         fn owner(self: @ContractState) -> ContractAddress {
