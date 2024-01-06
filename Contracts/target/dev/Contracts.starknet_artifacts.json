@@ -1,1 +1,1 @@
-{"version":1,"contracts":[{"id":"rs4kd4mlirks2","package_name":"Contracts","contract_name":"HelloStarknet","artifacts":{"sierra":"Contracts_HelloStarknet.sierra.json","casm":"Contracts_HelloStarknet.casm.json"}}]}
+{"version":1,"contracts":[{"id":"1lq0s5os8ie4o","package_name":"Contracts","contract_name":"Generate","artifacts":{"sierra":"Contracts_Generate.sierra.json","casm":"Contracts_Generate.casm.json"}}]}
