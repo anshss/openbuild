@@ -1,14 +1,9 @@
-#[starknet::interface]
-trait IGenerate<TContractState> {}
-
-
 #[starknet::contract]
 mod Generate {
     use openzeppelin::introspection::src5::SRC5Component;
     use openzeppelin::access::accesscontrol::AccessControlComponent;
     use openzeppelin::upgrades::UpgradeableComponent;
     use openzeppelin::token::erc721::ERC721Component;
-
 
     component!(path: SRC5Component, storage: src5, event: SRC5Event);
     component!(path: AccessControlComponent, storage: accesscontrol, event: AccessControlEvent);
@@ -17,25 +12,23 @@ mod Generate {
 
     #[abi(embed_v0)]
     impl SRC5Impl = SRC5Component::SRC5Impl<ContractState>;
-
     #[abi(embed_v0)]
     impl AccessControlImpl =
         AccessControlComponent::AccessControlImpl<ContractState>;
-
-    impl AccessControlInternalImpl = AccessControlComponent::InternalImpl<ContractState>;
-    impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
-
     #[abi(embed_v0)]
     impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
     #[abi(embed_v0)]
     impl ERC721MetadataImpl = ERC721Component::ERC721MetadataImpl<ContractState>;
 
+    impl AccessControlInternalImpl = AccessControlComponent::InternalImpl<ContractState>;
+    impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
     impl ERC721InternalImpl = ERC721Component::InternalImpl<ContractState>;
 
-
+    // Hack to simulate the 'crate' keyword
+    use super::super as crate;
+    use crate::igenerate::IGenerate;
     use core::traits::Into;
     use core::traits::TryInto;
-    use contracts::generate::IGenerate;
     use array::ArrayTrait;
     use option::OptionTrait;
     use serde::Serde;
@@ -76,9 +69,9 @@ mod Generate {
         #[substorage(v0)]
         erc721: ERC721Component::Storage,
         charater_id: u256,
-        // This mapping should return character array when given a address
-        // user_to_characters: LegacyMap::<ContractAddress, u256>,
-        // character_to_generations: LegacyMap::<u256, ContractAddress>,
+    // This mapping should return character array when given a address
+    // user_to_characters: LegacyMap::<ContractAddress, u256>,
+    // character_to_generations: LegacyMap::<u256, ContractAddress>,
     }
 
 
@@ -97,9 +90,11 @@ mod Generate {
         assert(!owner.is_zero(), 'Owner is zero address!');
         self.accesscontrol._grant_role('DEFAULT_ADMIN_ROLE', owner);
     }
-    
 
-
+    #[external(v0)]
+    impl Generate of IGenerate<ContractState> {
+        fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {}
+    }
 // #[generate_trait]
 // impl Private of PrivateTrait {
 //     fn _only_admin(self: @ContractState) -> () {
