@@ -1,40 +1,50 @@
-use starknet::ContractAddress;
-use starknet::ClassHash;
-use starknet::get_block_timestamp;
-
 #[starknet::interface]
 trait IGenerate<TContractState> {}
 
-#[starknet::interface]
-trait IUpgradeable<TContractState> {
-    fn upgrade(ref self: TContractState, new_class_hash: ClassHash);
-}
-
-#[starknet::interface]
-trait IOwnable<TContractState> {
-    fn owner(self: @TContractState) -> ContractAddress;
-    fn transfer_ownership(ref self: TContractState, new_owner: ContractAddress);
-    fn renounce_ownership(ref self: TContractState);
-}
 
 #[starknet::contract]
 mod Generate {
-    use openzeppelin::upgrades::interface::IUpgradeable;
-    use openzeppelin::upgrades::upgradeable::Upgradeable;
-    use openzeppelin::access::ownable::interface::IOwnable;
-    use openzeppelin::access::ownable::ownable::Ownable;
+    use openzeppelin::introspection::src5::SRC5Component;
+    use openzeppelin::access::accesscontrol::AccessControlComponent;
+    use openzeppelin::upgrades::UpgradeableComponent;
+    use openzeppelin::token::erc721::ERC721Component;
+
+
+    component!(path: SRC5Component, storage: src5, event: SRC5Event);
+    component!(path: AccessControlComponent, storage: accesscontrol, event: AccessControlEvent);
+    component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
+    component!(path: ERC721Component, storage: erc721, event: ERC721Event);
+
+    #[abi(embed_v0)]
+    impl SRC5Impl = SRC5Component::SRC5Impl<ContractState>;
+
+    #[abi(embed_v0)]
+    impl AccessControlImpl =
+        AccessControlComponent::AccessControlImpl<ContractState>;
+
+    impl AccessControlInternalImpl = AccessControlComponent::InternalImpl<ContractState>;
+    impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
+
+    #[abi(embed_v0)]
+    impl ERC721Impl = ERC721Component::ERC721Impl<ContractState>;
+    #[abi(embed_v0)]
+    impl ERC721MetadataImpl = ERC721Component::ERC721MetadataImpl<ContractState>;
+
+    impl ERC721InternalImpl = ERC721Component::InternalImpl<ContractState>;
+
+
     use core::traits::Into;
-    use starknet::ClassHash;
-    use starknet::contract_address_to_felt252;
     use core::traits::TryInto;
-    use Contracts::generate::IGenerate;
-    use starknet::get_caller_address;
-    use starknet::get_contract_address;
-    use starknet::ContractAddress;
+    use contracts::generate::IGenerate;
     use array::ArrayTrait;
     use option::OptionTrait;
     use serde::Serde;
     use box::BoxTrait;
+    use starknet::{
+        get_caller_address, get_contract_address, ContractAddress, ClassHash,
+        contract_address_to_felt252
+    };
+
 
     const DECIMALS: u256 = 1000000000000000000;
 
@@ -57,56 +67,44 @@ mod Generate {
 
     #[storage]
     struct Storage {
+        #[substorage(v0)]
+        src5: SRC5Component::Storage,
+        #[substorage(v0)]
+        accesscontrol: AccessControlComponent::Storage,
+        #[substorage(v0)]
+        upgradeable: UpgradeableComponent::Storage,
+        #[substorage(v0)]
+        erc721: ERC721Component::Storage,
         charater_id: u256,
         // This mapping should return character array when given a address
         // user_to_characters: LegacyMap::<ContractAddress, u256>,
         // character_to_generations: LegacyMap::<u256, ContractAddress>,
     }
 
+
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {}
+    enum Event {
+        #[flat]
+        AccessControlEvent: AccessControlComponent::Event,
+        SRC5Event: SRC5Component::Event,
+        ERC721Event: ERC721Component::Event,
+        UpgradeableEvent: UpgradeableComponent::Event,
+    }
 
     #[constructor]
     fn constructor(ref self: ContractState, owner: ContractAddress,) {
         assert(!owner.is_zero(), 'Owner is zero address!');
-        let mut unsafe_state = Ownable::unsafe_new_contract_state();
-        Ownable::InternalImpl::initializer(ref unsafe_state, owner);
+        self.accesscontrol._grant_role('DEFAULT_ADMIN_ROLE', owner);
     }
+    
 
-    // Upgradability
-    #[external(v0)]
-    impl UpgradeableImpl of IUpgradeable<ContractState> {
-        fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
-            self._only_admin();
-            let mut unsafe_state = Upgradeable::unsafe_new_contract_state();
-            Upgradeable::InternalImpl::_upgrade(ref unsafe_state, new_class_hash)
-        }
-    }
 
-    // Access Control
-    #[external(v0)]
-    impl OwnableImpl of IOwnable<ContractState> {
-        fn owner(self: @ContractState) -> ContractAddress {
-            let unsafe_state = Ownable::unsafe_new_contract_state();
-            Ownable::OwnableImpl::owner(@unsafe_state)
-        }
-
-        fn transfer_ownership(ref self: ContractState, new_owner: ContractAddress) {
-            let mut unsafe_state = Ownable::unsafe_new_contract_state();
-            Ownable::OwnableImpl::transfer_ownership(ref unsafe_state, new_owner)
-        }
-
-        fn renounce_ownership(ref self: ContractState) {
-            assert(true == false, 'renounce_ownership is disabled');
-        }
-    }
-
-    #[generate_trait]
-    impl Private of PrivateTrait {
-        fn _only_admin(self: @ContractState) -> () {
-            let unsafe_state = Ownable::unsafe_new_contract_state();
-            Ownable::InternalImpl::assert_only_owner(@unsafe_state);
-        }
-    }
+// #[generate_trait]
+// impl Private of PrivateTrait {
+//     fn _only_admin(self: @ContractState) -> () {
+//         let unsafe_state = Ownable::unsafe_new_contract_state();
+//         Ownable::InternalImpl::assert_only_owner(@unsafe_state);
+//     }
+// }
 }
