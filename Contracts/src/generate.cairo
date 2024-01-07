@@ -1,5 +1,6 @@
 #[starknet::contract]
 mod Generate {
+    use openzeppelin::access::accesscontrol::accesscontrol::AccessControlComponent::InternalTrait;
     use openzeppelin::introspection::src5::SRC5Component;
     use openzeppelin::access::accesscontrol::AccessControlComponent;
     use openzeppelin::upgrades::UpgradeableComponent;
@@ -39,6 +40,9 @@ mod Generate {
     };
 
 
+    mod Errors {
+        const ZERO_ADDRESS: felt252 = 'Zero address error';
+    }
     const DECIMALS: u256 = 1000000000000000000;
 
     #[derive(Drop, Serde, starknet::Strore)]
@@ -68,6 +72,7 @@ mod Generate {
         upgradeable: UpgradeableComponent::Storage,
         #[substorage(v0)]
         erc721: ERC721Component::Storage,
+        admin: ContractAddress,
         charater_id: u256,
     // This mapping should return character array when given a address
     // user_to_characters: LegacyMap::<ContractAddress, u256>,
@@ -86,20 +91,37 @@ mod Generate {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, owner: ContractAddress,) {
-        assert(!owner.is_zero(), 'Owner is zero address!');
-        self.accesscontrol._grant_role('DEFAULT_ADMIN_ROLE', owner);
+    fn constructor(ref self: ContractState, admin: ContractAddress,) {
+        assert(!admin.is_zero(), Errors::ZERO_ADDRESS);
+        self.accesscontrol.initializer();
+        self._set_admin(admin);
+        self.accesscontrol._grant_role('DEFAULT_ADMIN_ROLE', admin);
     }
 
     #[external(v0)]
     impl Generate of IGenerate<ContractState> {
-        fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {}
+        fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
+            self.accesscontrol.assert_only_role('DEFAULT_ADMIN_ROLE');
+            self.upgradeable._upgrade(new_class_hash);
+        }
+
+        fn update_admin(ref self: ContractState, new_admin: ContractAddress) {
+            assert(!new_admin.is_zero(), Errors::ZERO_ADDRESS);
+            let old_admin: ContractAddress = self.get_admin();
+            self.accesscontrol._grant_role('DEFAULT_ADMIN_ROLE', new_admin);
+            self._set_admin(new_admin);
+            self.accesscontrol._revoke_role('DEFAULT_ADMIN_ROLE', old_admin);
+        }
+
+        fn get_admin(self: @ContractState) -> ContractAddress {
+            self.admin.read()
+        }
     }
-// #[generate_trait]
-// impl Private of PrivateTrait {
-//     fn _only_admin(self: @ContractState) -> () {
-//         let unsafe_state = Ownable::unsafe_new_contract_state();
-//         Ownable::InternalImpl::assert_only_owner(@unsafe_state);
-//     }
-// }
+    #[generate_trait]
+    impl Private of PrivateTrait {
+        fn _set_admin(ref self: ContractState, _admin: ContractAddress) {
+            assert(!_admin.is_zero(), Errors::ZERO_ADDRESS);
+            self.admin.write(_admin);
+        }
+    }
 }
