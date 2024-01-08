@@ -4,12 +4,11 @@ import { ethers } from "ethers";
 import { registryAddress, registryAbi } from "./config";
 import axios from "axios";
 import { Web3Storage } from "web3.storage";
-import {
-    DataverseConnector,
-    SYSTEM_CALL,
-    RESOURCE,
-} from "@dataverse/dataverse-connector";
-import { timeStamp } from "console";
+// import {
+//     DataverseConnector,
+//     SYSTEM_CALL,
+//     RESOURCE,
+// } from "@dataverse/dataverse-connector";
 
 let allCharacters = [];
 let generations = [];
@@ -166,67 +165,69 @@ async function createContentURI(_productImage, _prompt, image, tba) {
     return url;
 }
 
+export async function createIpfsUri() {}
+
 // --------- Dataverse
 
-const dataverseConnector = new DataverseConnector();
+// const dataverseConnector = new DataverseConnector();
 
-export async function loginDataverse() {
-    await dataverseConnector.connectWallet();
-    const pkh = await dataverseConnector.runOS({
-        method: SYSTEM_CALL.createCapability,
-        params: {
-            appId: "4e6d651a-77ea-441d-9198-a3edf968e9f4",
-            resource: RESOURCE.CERAMIC,
-        },
-    });
-    console.log("pkh:", pkh);
-    return pkh;
-}
+// export async function loginDataverse() {
+//     await dataverseConnector.connectWallet();
+//     const pkh = await dataverseConnector.runOS({
+//         method: SYSTEM_CALL.createCapability,
+//         params: {
+//             appId: "4e6d651a-77ea-441d-9198-a3edf968e9f4",
+//             resource: RESOURCE.CERAMIC,
+//         },
+//     });
+//     console.log("pkh:", pkh);
+//     return pkh;
+// }
 
-export async function uploadToDataverse(inputText) {
-    await loginDataverse();
+// export async function uploadToDataverse(inputText) {
+//     await loginDataverse();
 
-    const encrypted = JSON.stringify({
-        text: false,
-        images: false,
-        videos: false,
-    });
+//     const encrypted = JSON.stringify({
+//         text: false,
+//         images: false,
+//         videos: false,
+//     });
 
-    await dataverseConnector.connectWallet();
-    const res = await dataverseConnector.runOS({
-        method: SYSTEM_CALL.createIndexFile,
-        params: {
-            modelId:
-                "kjzl6hvfrbw6c8eukmrwgbdmhdy2h7vw4l0ypd2yfkli7xfo1qt6ogp3srr376v",
-            fileName: "test",
-            fileContent: {
-                modelVersion: "0",
-                text: inputText,
-                images: [],
-                videos: [],
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                encrypted,
-            },
-        },
-    });
+//     await dataverseConnector.connectWallet();
+//     const res = await dataverseConnector.runOS({
+//         method: SYSTEM_CALL.createIndexFile,
+//         params: {
+//             modelId:
+//                 "kjzl6hvfrbw6c8eukmrwgbdmhdy2h7vw4l0ypd2yfkli7xfo1qt6ogp3srr376v",
+//             fileName: "test",
+//             fileContent: {
+//                 modelVersion: "0",
+//                 text: inputText,
+//                 images: [],
+//                 videos: [],
+//                 createdAt: new Date().toISOString(),
+//                 updatedAt: new Date().toISOString(),
+//                 encrypted,
+//             },
+//         },
+//     });
 
-    console.log(res);
-    console.log(res.fileContent.file.contentId);
+//     console.log(res);
+//     console.log(res.fileContent.file.contentId);
 
-    return res.fileContent.file.contentId;
-}
+//     return res.fileContent.file.contentId;
+// }
 
-export const loadWithDataverse = async (streamId) => {
-    await loginDataverse();
+// export const loadWithDataverse = async (streamId) => {
+//     await loginDataverse();
 
-    const res = await dataverseConnector.runOS({
-        method: SYSTEM_CALL.loadFile,
-        params: streamId,
-    });
+//     const res = await dataverseConnector.runOS({
+//         method: SYSTEM_CALL.loadFile,
+//         params: streamId,
+//     });
 
-    return res.fileContent.content.text;
-};
+//     return res.fileContent.content.text;
+// };
 
 // --------- Contract Calls
 

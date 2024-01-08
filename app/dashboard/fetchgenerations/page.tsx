@@ -4,7 +4,7 @@
 
 import {
     fetchAllGenerations,
-    loadWithDataverse,
+    // loadWithDataverse,
     publishGenerationCall,
     uploadToIPFS,
 } from "@/utils";
@@ -40,49 +40,49 @@ const FetchModels = () => {
         isPosted: any;
         streamId: any;
     }) {
-        const [imageLink, setImage] = useState<String | null>("");
-        console.log(streamId)
+        // const [imageLink, setImage] = useState<String | null>("");
+        // console.log(streamId)
 
-        useEffect(() => {
-            if (isPosted=="false") {
-                fetchStreamURI();
-            }
-            else {
-                fetchIpfsURI()
-            }
-        }, []);
+        // useEffect(() => {
+        //     if (isPosted=="false") {
+        //         fetchStreamURI();
+        //     }
+        //     else {
+        //         fetchIpfsURI()
+        //     }
+        // }, []);
 
-        async function fetchStreamURI() {
-            const result = await loadWithDataverse(streamId);
-            setImage(result);
-        }
+        // async function fetchStreamURI() {
+        //     const result = await loadWithDataverse(streamId);
+        //     setImage(result);
+        // }
 
-        async function fetchIpfsURI() {
-            console.log("uri hove yo")
-            const res1 = await axios.get(streamId);
-            console.log("res1", res1)
-            setImage(res1.data.ipfsLink);
-        }
+        // async function fetchIpfsURI() {
+        //     console.log("uri hove yo")
+        //     const res1 = await axios.get(streamId);
+        //     console.log("res1", res1)
+        //     setImage(res1.data.ipfsLink);
+        // }
 
 
 
         async function publish() {
-            console.log("imglink", imageLink);
-            const obj = {
-                ipfsLink: imageLink,
-            };
-            const data = JSON.stringify(obj);
-            const files = [new File([data], "data.json")];
-            const ipfsCid = await uploadToIPFS(files);
-            const url = `https://ipfs.io/ipfs/${ipfsCid}/data.json`;
-            console.log(url);
-            await publishGenerationCall(characterId, generationId, url);
+            // console.log("imglink", imageLink);
+            // const obj = {
+            //     ipfsLink: imageLink,
+            // };
+            // const data = JSON.stringify(obj);
+            // const files = [new File([data], "data.json")];
+            // const ipfsCid = await uploadToIPFS(files);
+            // const url = `https://ipfs.io/ipfs/${ipfsCid}/data.json`;
+            // console.log(url);
+            // await publishGenerationCall(characterId, generationId, url);
         }
 
         return (
             <div className="flex justify-center mt-10 w-[100%]">
                 <div className="flex w-[70%] gap-5 p-6 cursor-pointer bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                    <img src={imageLink} width="300px" />
+                    <img src={streamId} width="300px" />
                     <div className="flex flex-col justify-between">
                         <div className="w-[100%]">
                             <p className="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">

@@ -5,7 +5,7 @@ import {
     callFineTuneAPI,
     createGenerationCall,
     uploadToIPFS,
-    uploadToDataverse,
+    // uploadToDataverse,
 } from "@/utils";
 import NavBar from "@/components/NavBar";
 import SideBar from "@/components/SideBar";
@@ -57,9 +57,9 @@ const CreateVideo = () => {
     async function contentGenCreationCall() {
         setLoaders((e) => ({ ...e, createAccountLoader: true }));
 
-        const streamId = await uploadToDataverse(generatedVideo);
+        // const streamId = await uploadToDataverse(generatedVideo);
 
-        await createGenerationCall(formInput.id, streamId);
+        await createGenerationCall(formInput.id, generatedVideo);
 
         toast.success("Content Published to TBA!", {
             position: "bottom-left",

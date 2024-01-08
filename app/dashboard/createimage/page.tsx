@@ -5,7 +5,7 @@ import {
     callFineTuneAPI,
     createGenerationCall,
     uploadToIPFS,
-    uploadToDataverse,
+    // uploadToDataverse,
 } from "@/utils";
 import NavBar from "@/components/NavBar";
 import SideBar from "@/components/SideBar";
@@ -48,9 +48,9 @@ const CreateContent = () => {
     async function createGeneration() {
         setLoaders((e) => ({ ...e, createAccountLoader: true }));
 
-        const streamId = await uploadToDataverse(generatedImage);
+        // const streamId = await uploadToDataverse(generatedImage);
 
-        await createGenerationCall(formInput.id, streamId);
+        await createGenerationCall(formInput.id, generatedImage);
 
         toast.success("Generation published to your account!", {
             position: "bottom-left",

@@ -4,7 +4,7 @@ import {
     callCharacterGenAPI,
     createCharacterCall,
     callFineTuneAPI,
-    uploadToDataverse,
+    // uploadToDataverse,
 } from "@/utils";
 import NavBar from "@/components/NavBar";
 import SideBar from "@/components/SideBar";
@@ -48,8 +48,8 @@ const CreateModel = () => {
     async function modelGenAccountCreationCall() {
         setLoaders((e) => ({ ...e, createAccountLoader: true }));
 
-        const uri = uploadToDataverse(generatedImage)
-        await createCharacterCall(uri, formInput.modelName);
+        // const uri = uploadToDataverse(generatedImage)
+        await createCharacterCall(generatedImage, formInput.modelName);
 
         toast.success("GenHub Character Created!", {
             position: "bottom-left",

@@ -2,7 +2,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { fetchPosts, getCharacterURIFromId, loadWithDataverse } from "@/utils";
+import { fetchPosts, getCharacterURIFromId, 
+        // loadWithDataverse
+} from "@/utils";
 import { useEffect, useState } from "react";
 import SideBar from "@/components/SideBar";
 import NavBar from "@/components/NavBar";

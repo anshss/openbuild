@@ -2,7 +2,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { fetchAllCharacters, loadWithDataverse } from "@/utils";
+import { fetchAllCharacters,
+        //  loadWithDataverse 
+    } from "@/utils";
 import { useEffect, useState } from "react";
 import SideBar from "@/components/SideBar";
 import NavBar from "@/components/NavBar";
@@ -35,21 +37,21 @@ const FetchModels = () => {
         isSale: any;
         _price: any;
     }) {
-        const [image, setImage] = useState("");
+        // const [image, setImage] = useState("");
 
-        useEffect(() => {
-            fetchURI();
-        }, []);
+        // useEffect(() => {
+        //     fetchURI();
+        // }, []);
 
-        async function fetchURI() {
-            const result = await loadWithDataverse(uri);
-            setImage(result);
-        }
+        // async function fetchURI() {
+        //     const result = await loadWithDataverse(uri);
+        //     setImage(result);
+        // }
 
         return (
             <div className="mt-10 relative">
                 <div className="flex gap-5 block w-3/4 relative p-6 mx-auto cursor-pointer bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                    <img src={image} width="100px" />
+                    <img src={uri} width="100px" />
                     {/* <p>Model Id: {prop.modelId}</p> */}
                     <div className="w-[80%]">
                         <div className="flex">

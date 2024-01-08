@@ -1,4 +1,4 @@
-const mumbaiAddress = `0x773714BBCD21d904Ad0351B7f9347206C934a47c`
+const mumbaiAddress = `0x0274A6A8BAaab43f850cd382EC78036568bdB84d`
 
 export const registryAddress = mumbaiAddress
 
