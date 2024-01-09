@@ -1,3 +1,3 @@
 mod generate;
-mod igenerate;
+mod interface;
 
