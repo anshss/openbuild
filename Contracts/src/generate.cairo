@@ -121,12 +121,21 @@ mod Generate {
                 .write(get_caller_address(), self.character_length.read(get_caller_address()) + 1);
             return self.current_character_id();
         }
-
-        // fn get_user_characters(
-        //     self: @ContractState, user_address: ContractAddress
-        // ) -> Array<Character> {
-        //     assert(!user_address.is_zero(), Errors::ZERO_ADDRESS);
-        // }
+        fn get_user_characters(
+            self: @ContractState, user_address: ContractAddress
+        ) -> Array<Character> {
+            assert(!user_address.is_zero(), Errors::ZERO_ADDRESS);
+            let mut user_characters = ArrayTrait::<Character>::new();
+            let mut i:u256 = 0;
+            // loop {
+            //     if(i>=self.character_length.read(user_address)){
+            //         break;
+            //     }
+            //     let mut character:Character = self.user_to_characters.read()
+            //     i+=1;
+            // };
+            return user_characters;
+        }
 
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
             self.accesscontrol.assert_only_role('DEFAULT_ADMIN_ROLE');
