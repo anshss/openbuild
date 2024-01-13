@@ -1,0 +1,16 @@
+boto3
+fastapi
+gunicorn
+ibm-watson
+openai
+pillow
+pydantic
+pydub
+python-dotenv
+replicate
+requests
+uvicorn
+urllib3
+ibm-cloud-sdk-core
+python-multipart
+ffmpeg-python

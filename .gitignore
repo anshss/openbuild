@@ -1,5 +1,12 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+/python-apis/modelgen/.env.local
+
+
+/dataverseos/node_modules
+.pnpm-store
+/dataverseos/.pnpm-store
+
 # dependencies
 /node_modules
 /.pnp

@@ -1,34 +1,38 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# GenHub
 
-## Getting Started
+<br/>
 
-First, run the development server:
+### About Project
+AI embracing social networks. It leverages AI and DataverseOS to let users define an AI character and create private content with it which they can choose to make public using IPFS.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+<br />
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- AI Image Generation to generate AI character images and revamped product advertisement image generation to generate advertisements.
+- AI Video Generation to generate advertisement videos around these AI characters.
+- Fine-tuning feature powered by AI allows users to create content that truly reflects their individuality.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+<br/>
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### Project Files
+python-apis: AI APIs for model and content generation <br />
+app: Next.js frontend to interact with smart contracts and AI apis <br />
 
-## Learn More
+<br />
 
-To learn more about Next.js, take a look at the following resources:
+### Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Clone the repo
+   ```sh
+   git clone https://github.com/anshss/rebuild-ownership
+   
+   ```
+2. Install NPM packages
+   ```sh
+   npm install
+   ```
+   
+3. Start project
+   ```sh
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
