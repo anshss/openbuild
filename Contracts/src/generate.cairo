@@ -40,8 +40,31 @@ mod Generate {
         const ZERO_ADDRESS: felt252 = 'Zero address error';
         const INVALID_URI: felt252 = 'Invalid URI provided';
         const INVALID_NAME: felt252 = 'Invalid name provided';
+        const INVALID_CHARACTER_ID: felt252 = 'Invalid character ID';
+        const INVALID_STREAM_ID: felt252 = 'Invalid stream ID';
+        const INVALID_GENERATION_ID: felt252 = 'Invalid generation Id';
     }
+
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    enum Event {
+        #[flat]
+        AccessControlEvent: AccessControlComponent::Event,
+        SRC5Event: SRC5Component::Event,
+        ERC721Event: ERC721Component::Event,
+        UpgradeableEvent: UpgradeableComponent::Event,
+        CharacterCreation: CharacterCreation,
+    }
+
     const DECIMALS: u256 = 1000000000000000000;
+
+    #[derive(Drop, starknet::Event)]
+    struct CharacterCreation {
+        #[key]
+        character_id: u256,
+        #[key]
+        user_address: ContractAddress
+    }
 
     #[derive(Drop, Serde, starknet::Store)]
     struct Character {
@@ -72,21 +95,12 @@ mod Generate {
         erc721: ERC721Component::Storage,
         admin: ContractAddress,
         character_id: u256,
-        user_to_characters: LegacyMap::<(ContractAddress, u256), Character>,
-        character_length: LegacyMap::<ContractAddress, u256>,
-    // character_to_generation: LegacyMap::<u256, Generation>,
+        generation_id: u256,
+        chartacter_id_to_character: LegacyMap::<u256, Character>,
+        user_characters: LegacyMap::<(ContractAddress, u256), u256>,
+        user_character_length: LegacyMap::<ContractAddress, u256>,
     }
 
-
-    #[event]
-    #[derive(Drop, starknet::Event)]
-    enum Event {
-        #[flat]
-        AccessControlEvent: AccessControlComponent::Event,
-        SRC5Event: SRC5Component::Event,
-        ERC721Event: ERC721Component::Event,
-        UpgradeableEvent: UpgradeableComponent::Event,
-    }
 
     #[constructor]
     fn constructor(ref self: ContractState, admin: ContractAddress,) {
@@ -105,9 +119,9 @@ mod Generate {
             assert(!character_name.is_zero(), Errors::INVALID_NAME);
             self.character_id.write(self.current_character_id() + 1);
             self
-                .user_to_characters
+                .chartacter_id_to_character
                 .write(
-                    (get_caller_address(), self.current_character_id()),
+                    self.current_character_id(),
                     Character {
                         character_id: self.current_character_id(),
                         charater_name: character_name,
@@ -117,24 +131,70 @@ mod Generate {
                     }
                 );
             self
-                .character_length
-                .write(get_caller_address(), self.character_length.read(get_caller_address()) + 1);
+                .user_characters
+                .write(
+                    (get_caller_address(), self.user_character_length.read(get_caller_address())),
+                    self.current_character_id()
+                );
+
+            self
+                .user_character_length
+                .write(
+                    get_caller_address(), self.user_character_length.read(get_caller_address()) + 1
+                );
+            self
+                .emit(
+                    CharacterCreation {
+                        character_id: self.current_character_id(),
+                        user_address: get_caller_address()
+                    }
+                );
             return self.current_character_id();
         }
+
+        fn publish_generation(
+            ref self: ContractState, character_id: u256, stream_id: felt252
+        ) -> u256 {
+            assert(
+                character_id <= self.current_character_id() && character_id > 0,
+                Errors::INVALID_CHARACTER_ID
+            );
+            assert(!stream_id.is_zero(), Errors::INVALID_STREAM_ID);
+            0
+        }
+
+
         fn get_user_characters(
             self: @ContractState, user_address: ContractAddress
         ) -> Array<Character> {
             assert(!user_address.is_zero(), Errors::ZERO_ADDRESS);
-            let mut user_characters = ArrayTrait::<Character>::new();
-            let mut i:u256 = 0;
-            // loop {
-            //     if(i>=self.character_length.read(user_address)){
-            //         break;
-            //     }
-            //     let mut character:Character = self.user_to_characters.read()
-            //     i+=1;
-            // };
-            return user_characters;
+            let mut user_all_characters = ArrayTrait::<Character>::new();
+            let mut len: u256 = self.user_character_length.read(user_address);
+            let mut i: u256 = 0;
+            loop {
+                if (i >= len) {
+                    break;
+                }
+                let mut character: Character = self
+                    .chartacter_id_to_character
+                    .read(self.user_characters.read((user_address, i)));
+                user_all_characters.append(character);
+                i += 1;
+            };
+            return user_all_characters;
+        }
+
+
+        fn current_character_id(self: @ContractState) -> u256 {
+            self.character_id.read()
+        }
+
+        fn current_generation_id(self: @ContractState) -> u256 {
+            self.generation_id.read()
+        }
+
+        fn get_admin(self: @ContractState) -> ContractAddress {
+            self.admin.read()
         }
 
         fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
@@ -149,15 +209,6 @@ mod Generate {
             self.accesscontrol._grant_role('DEFAULT_ADMIN_ROLE', new_admin);
             self._set_admin(new_admin);
             self.accesscontrol._revoke_role('DEFAULT_ADMIN_ROLE', old_admin);
-        }
-
-        fn current_character_id(self: @ContractState) -> u256 {
-            self.character_id.read()
-        }
-
-
-        fn get_admin(self: @ContractState) -> ContractAddress {
-            self.admin.read()
         }
     }
     #[generate_trait]
