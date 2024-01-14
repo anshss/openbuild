@@ -10,10 +10,9 @@ trait IGenerate<TContractState> {
     fn get_user_characters(
         self: @TContractState, user_address: ContractAddress
     ) -> Array<Character>;
-    // @note_anubhav: Below returns uri or smtg else?
-    // fn get_character_uri(self:@TContractState, character_id:u256, user_address:ContractAddress) -> felt252;
-    // fn get_all_generations(self:@TContractState, character_id:u256) -> Array<Generation>;
-
+    fn get_generations_by_character_id(
+        self: @TContractState, character_id: u256
+    ) -> Array<Generation>;
     fn current_character_id(self: @TContractState) -> u256;
     fn current_generation_id(self: @TContractState) -> u256;
     fn upgrade(ref self: TContractState, new_class_hash: ClassHash);

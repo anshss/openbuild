@@ -57,8 +57,6 @@ mod Generate {
         PublishGeneration: PublishGeneration,
     }
 
-    const DECIMALS: u256 = 1000000000000000000;
-
     #[derive(Drop, starknet::Event)]
     struct CharacterCreation {
         #[key]
@@ -122,7 +120,6 @@ mod Generate {
         character_to_generations: LegacyMap::<(u256, u256), u256>,
         character_generation_length: LegacyMap::<u256, u256>,
     }
-
 
     #[constructor]
     fn constructor(ref self: ContractState, admin: ContractAddress,) {
@@ -212,7 +209,6 @@ mod Generate {
             return self.current_generation_id();
         }
 
-
         fn publish_generation(ref self: ContractState, generation_id: u256) {
             assert(
                 generation_id <= self.current_character_id() && generation_id > 0,
@@ -238,7 +234,6 @@ mod Generate {
             self.emit(PublishGeneration { generation_id: generation_id, to: get_caller_address() });
         }
 
-
         fn get_user_characters(
             self: @ContractState, user_address: ContractAddress
         ) -> Array<Character> {
@@ -259,6 +254,29 @@ mod Generate {
             return user_all_characters;
         }
 
+        fn get_generations_by_character_id(
+            self: @ContractState, character_id: u256
+        ) -> Array<Generation> {
+            assert(
+                character_id <= self.current_character_id() && character_id > 0,
+                Errors::INVALID_CHARACTER_ID
+            );
+            let mut generations = ArrayTrait::<Generation>::new();
+            let mut len: u256 = self.character_generation_length.read(character_id);
+            let mut i: u256 = 0;
+            loop {
+                if (i >= len) {
+                    break;
+                }
+                let mut generation_id: u256 = self.character_to_generations.read((character_id, i));
+                let mut generation: Generation = self
+                    .generation_id_to_generation
+                    .read(generation_id);
+                generations.append(generation);
+                i += 1;
+            };
+            return generations;
+        }
 
         fn current_character_id(self: @ContractState) -> u256 {
             self.character_id.read()
