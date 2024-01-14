@@ -1,6 +1,4 @@
 "use client";
-import web3modal from "web3modal";
-import { ethers } from "ethers";
 import { registryAddress, registryAbi } from "./config";
 import axios from "axios";
 import { Web3Storage } from "web3.storage";
@@ -13,7 +11,7 @@ import { Web3Storage } from "web3.storage";
 let allCharacters = [];
 let generations = [];
 
-fetchAllCharacters();
+// fetchAllCharacters();
 
 
 // --------- Contract Instance
