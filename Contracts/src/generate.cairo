@@ -41,7 +41,6 @@ mod Generate {
         const INVALID_URI: felt252 = 'Invalid URI provided';
         const INVALID_NAME: felt252 = 'Invalid name provided';
         const INVALID_CHARACTER_ID: felt252 = 'Invalid character ID';
-        const INVALID_STREAM_ID: felt252 = 'Invalid stream ID';
         const INVALID_GENERATION_ID: felt252 = 'Invalid generation Id';
     }
 
@@ -54,6 +53,8 @@ mod Generate {
         ERC721Event: ERC721Component::Event,
         UpgradeableEvent: UpgradeableComponent::Event,
         CharacterCreation: CharacterCreation,
+        GenerationCreation: GenerationCreation,
+        PublishGeneration: PublishGeneration,
     }
 
     const DECIMALS: u256 = 1000000000000000000;
@@ -64,6 +65,24 @@ mod Generate {
         character_id: u256,
         #[key]
         user_address: ContractAddress
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct GenerationCreation {
+        #[key]
+        character_id: u256,
+        #[key]
+        generation_id: u256,
+        #[key]
+        user_address: ContractAddress
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct PublishGeneration {
+        #[key]
+        generation_id: u256,
+        #[key]
+        to: ContractAddress
     }
 
     #[derive(Drop, Serde, starknet::Store)]
@@ -80,7 +99,7 @@ mod Generate {
         generation_id: u256,
         character_id: u256,
         is_posted: bool,
-        stream_id: felt252,
+        uri: felt252,
     }
 
     #[storage]
@@ -99,6 +118,9 @@ mod Generate {
         chartacter_id_to_character: LegacyMap::<u256, Character>,
         user_characters: LegacyMap::<(ContractAddress, u256), u256>,
         user_character_length: LegacyMap::<ContractAddress, u256>,
+        generation_id_to_generation: LegacyMap::<u256, Generation>,
+        character_to_generations: LegacyMap::<(u256, u256), u256>,
+        character_generation_length: LegacyMap::<u256, u256>,
     }
 
 
@@ -152,15 +174,68 @@ mod Generate {
             return self.current_character_id();
         }
 
-        fn publish_generation(
-            ref self: ContractState, character_id: u256, stream_id: felt252
-        ) -> u256 {
+        fn create_generation(ref self: ContractState, character_id: u256, uri: felt252) -> u256 {
             assert(
                 character_id <= self.current_character_id() && character_id > 0,
                 Errors::INVALID_CHARACTER_ID
             );
-            assert(!stream_id.is_zero(), Errors::INVALID_STREAM_ID);
-            0
+            assert(!uri.is_zero(), Errors::INVALID_URI);
+            self.generation_id.write(self.current_generation_id() + 1);
+            self
+                .generation_id_to_generation
+                .write(
+                    self.current_generation_id(),
+                    Generation {
+                        generation_id: self.current_generation_id(),
+                        character_id: character_id,
+                        is_posted: false,
+                        uri: uri,
+                    }
+                );
+            self
+                .character_to_generations
+                .write(
+                    (character_id, self.character_generation_length.read(character_id)),
+                    self.current_generation_id()
+                );
+            self
+                .character_generation_length
+                .write(character_id, self.character_generation_length.read(character_id) + 1);
+            self
+                .emit(
+                    GenerationCreation {
+                        character_id: character_id,
+                        generation_id: self.current_generation_id(),
+                        user_address: get_caller_address()
+                    }
+                );
+            return self.current_generation_id();
+        }
+
+
+        fn publish_generation(ref self: ContractState, generation_id: u256) {
+            assert(
+                generation_id <= self.current_character_id() && generation_id > 0,
+                Errors::INVALID_GENERATION_ID
+            );
+            self
+                .generation_id_to_generation
+                .write(
+                    generation_id,
+                    Generation {
+                        generation_id: generation_id,
+                        character_id: self
+                            .generation_id_to_generation
+                            .read(generation_id)
+                            .character_id,
+                        is_posted: true,
+                        uri: self.generation_id_to_generation.read(generation_id).uri,
+                    }
+                );
+            self.erc721._mint(get_caller_address(), generation_id);
+            let mut uri: felt252 = self.generation_id_to_generation.read(generation_id).uri;
+            self.erc721._set_token_uri(generation_id, uri);
+            self.emit(PublishGeneration { generation_id: generation_id, to: get_caller_address() });
         }
 
 

@@ -5,7 +5,8 @@ use contracts::generate::Generate::Generation;
 #[starknet::interface]
 trait IGenerate<TContractState> {
     fn create_character(ref self: TContractState, uri: felt252, character_name: felt252) -> u256;
-    fn publish_generation(ref self: TContractState, character_id: u256, stream_id: felt252) -> u256;
+    fn create_generation(ref self: TContractState, character_id: u256, uri: felt252) -> u256;
+    fn publish_generation(ref self: TContractState, generation_id: u256);
     fn get_user_characters(
         self: @TContractState, user_address: ContractAddress
     ) -> Array<Character>;
