@@ -122,11 +122,12 @@ mod Generate {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, admin: ContractAddress,) {
+    fn constructor(ref self: ContractState, admin: ContractAddress, name:felt252, symbol:felt252) {
         assert(!admin.is_zero(), Errors::ZERO_ADDRESS);
         self.accesscontrol.initializer();
         self._set_admin(admin);
         self.accesscontrol._grant_role('DEFAULT_ADMIN_ROLE', admin);
+        self.erc721.initializer(name, symbol);
     }
 
     #[external(v0)]
